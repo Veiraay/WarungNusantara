@@ -42,6 +42,17 @@
         <li><a href="#kontak">Kontak</a></li>
       </ul>
 
+      <!-- ============================================================
+           TOMBOL KERANJANG DI NAVBAR
+           Klik untuk membuka halaman keranjang.html
+           Badge merah menunjukkan jumlah item di keranjang
+           ============================================================ -->
+      <a href="keranjang.html" class="nav-keranjang" id="navKeranjang" title="Lihat Keranjang">
+        🛒
+        <!-- Badge jumlah item — diperbarui otomatis oleh JavaScript -->
+        <span class="keranjang-badge" id="keranjangBadge">0</span>
+      </a>
+
       <!-- Tombol hamburger untuk mobile -->
       <button class="hamburger" id="hamburger" aria-label="Buka menu">
         <span></span>
@@ -713,31 +724,71 @@
 
     // ============================================================
     // 5. TOMBOL TAMBAH KERANJANG
-    // Fungsi ini dipanggil saat tombol "+" diklik di kartu produk
-    // Ubah perilaku sesuai kebutuhan (integrasi ke keranjang, dsb)
+    // Data keranjang disimpan di localStorage agar tetap ada
+    // saat berpindah ke halaman keranjang.html
     // ============================================================
-    let jumlahKeranjang = 0;  // Counter keranjang — bisa ditampilkan di navbar
+
+    // Ambil data keranjang dari localStorage (atau array kosong jika belum ada)
+    function ambilKeranjang() {
+      return JSON.parse(localStorage.getItem('keranjang') || '[]');
+    }
+
+    // Simpan data keranjang ke localStorage
+    function simpanKeranjang(data) {
+      localStorage.setItem('keranjang', JSON.stringify(data));
+    }
+
+    // Update badge angka di navbar
+    function updateBadge() {
+      const keranjang = ambilKeranjang();
+      const total = keranjang.reduce(function(sum, item) { return sum + item.qty; }, 0);
+      const badge = document.getElementById('keranjangBadge');
+      if (badge) {
+        badge.textContent = total;
+        // Sembunyikan badge jika kosong, tampilkan jika ada isi
+        badge.style.display = total > 0 ? 'flex' : 'none';
+      }
+    }
 
     function tambahKeranjang(tombol) {
-      jumlahKeranjang++;
+      // Ambil info produk dari kartu yang sama dengan tombol
+      const kartu    = tombol.closest('.kartu-produk');
+      const nama     = kartu.querySelector('.kartu-nama').textContent.trim();
+      const hargaTeks = kartu.querySelector('.kartu-harga').textContent.trim();
+      // Ubah "Rp 20.000" → 20000 (angka murni)
+      const harga    = parseInt(hargaTeks.replace(/[^0-9]/g, ''));
+      // Ambil src gambar jika ada, atau kosong
+      const gambarEl = kartu.querySelector('.kartu-gambar img');
+      const gambar   = gambarEl ? gambarEl.getAttribute('src') : '';
 
-      // Efek visual: tombol bergetar
+      // Ambil keranjang yang ada, cari apakah produk ini sudah masuk
+      const keranjang = ambilKeranjang();
+      const indeks    = keranjang.findIndex(function(item) { return item.nama === nama; });
+
+      if (indeks >= 0) {
+        // Produk sudah ada → tambah qty saja
+        keranjang[indeks].qty++;
+      } else {
+        // Produk baru → tambahkan ke array
+        keranjang.push({ nama: nama, harga: harga, gambar: gambar, qty: 1 });
+      }
+
+      simpanKeranjang(keranjang);
+      updateBadge();
+
+      // Efek visual tombol
       tombol.textContent = '✓';
-      tombol.style.background = '#27AE60';  /* Warna hijau saat berhasil ditambah */
-
-      // Kembalikan ke semula setelah 1.5 detik (1500ms) — ubah angka ini
-      setTimeout(function () {
+      tombol.style.background = '#27AE60';
+      setTimeout(function() {
         tombol.textContent = '+';
         tombol.style.background = '';
       }, 1500);
 
-      // Nama produk dari kartu
-      const namaEl = tombol.closest('.kartu-produk').querySelector('.kartu-nama');
-      const nama = namaEl ? namaEl.textContent : 'Produk';
-
-      // Tampilkan notifikasi kecil
       tampilkanNotif(nama + ' ditambahkan ke keranjang 🛒');
     }
+
+    // Jalankan update badge saat halaman pertama dimuat
+    updateBadge();
 
     // Fungsi notifikasi popup kecil di pojok layar
     function tampilkanNotif(pesan) {

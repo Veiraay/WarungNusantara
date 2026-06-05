@@ -54,8 +54,37 @@
  }
 
  /* ============================================================
-       RESET & BASE — jangan diubah kecuali kamu tahu apa yang kamu lakukan
-       ============================================================ */
+    TOMBOL KERANJANG DI NAVBAR
+    Ubah warna badge di .keranjang-badge background
+    ============================================================ */
+ .nav-keranjang {
+   position: relative;
+   font-size: 1.5rem;
+   text-decoration: none;
+   display: flex;
+   align-items: center;
+   cursor: pointer;
+   transition: transform 0.2s;
+ }
+ .nav-keranjang:hover { transform: scale(1.15); }
+
+ /* Badge merah di pojok atas ikon keranjang */
+ .keranjang-badge {
+   position: absolute;
+   top: -8px;
+   right: -10px;
+   background: var(--warna-utama);   /* Ubah warna badge di sini */
+   color: white;
+   font-size: 0.65rem;
+   font-weight: 700;
+   width: 18px;
+   height: 18px;
+   border-radius: 50%;
+   display: none;                    /* Tersembunyi saat kosong */
+   align-items: center;
+   justify-content: center;
+   font-family: var(--font-isi);
+ }
  *,
  *::before,
  *::after {
