@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <!-- ============================================================
+       JUDUL TAB — ubah sesuai nama UMKM-mu
+       ============================================================ -->
+  <title>Konfirmasi Pesanan | Warung Nusantara</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* ============================================================
+       STYLE KHUSUS HALAMAN KONFIRMASI
+       Semua warna mengikuti variabel di style.css
+       ============================================================ */
+
+    .halaman-konfirmasi {
+      padding-top: 100px;
+      padding-bottom: 60px;
+      min-height: 100vh;
+      background: var(--warna-latar);
+    }
+
+    /* ── BANNER SUKSES DI ATAS HALAMAN ── */
+    .banner-sukses {
+      background: linear-gradient(135deg, #1a5c2e 0%, #27AE60 100%);
+      border-radius: var(--radius-bulat);
+      padding: 40px;                /* Ubah untuk padding banner */
+      text-align: center;
+      color: white;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeInDown 0.6s ease both;
+    }
+
+    /* Pola titik-titik di latar banner */
+    .banner-sukses::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Lingkaran besar di sudut kanan atas banner */
+    .banner-sukses::after {
+      content: '';
+      position: absolute;
+      right: -80px; top: -80px;
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+
+    .banner-ikon {
+      font-size: 3.5rem;            /* Ubah ukuran ikon centang besar */
+      display: block;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+      animation: bounceIn 0.7s 0.3s ease both;
+    }
+
+    .banner-sukses h1 {
+      font-family: var(--font-judul);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 900;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .banner-sukses p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Nomor pesanan dalam banner */
+    .no-pesanan-banner {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 50px;
+      padding: 8px 24px;
+      font-family: var(--font-judul);
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 3px;
+      margin: 14px 0 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── STEP INDICATOR (4 langkah) ── */
+    .step-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+      animation: fadeInUp 0.6s 0.2s ease both;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 2px solid var(--warna-garis);
+      background: white;
+      color: #ccc;
+    }
+
+    .step.selesai .step-num {
+      background: #27AE60;
+      border-color: #27AE60;
+      color: white;
+    }
+
+    .step-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #bbb;
+      letter-spacing: 0.3px;
+      text-align: center;
+    }
+    .step.selesai .step-label { color: #27AE60; }
+
+    .step-garis {
+      flex: 1;
+      height: 2px;
+      background: #27AE60;
+      max-width: 70px;
+      margin: 0 8px;
+      margin-bottom: 22px;
+    }
+
+    /* ── LAYOUT UTAMA: kiri (invoice) + kanan (status & aksi) ── */
+    .konfirmasi-layout {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr;   /* Ubah perbandingan kolom di sini */
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* ── KARTU / PANEL UMUM ── */
+    .panel {
+      background: white;
+      border-radius: var(--radius-bulat);
+      box-shadow: var(--bayangan);
+      margin-bottom: 20px;
+      overflow: hidden;
+      animation: fadeInUp 0.5s ease both;
+    }
+
+    /* Delay animasi tiap panel berbeda agar muncul bertahap */
+    .panel:nth-child(1) { animation-delay: 0.1s; }
+    .panel:nth-child(2) { animation-delay: 0.2s; }
+    .panel:nth-child(3) { animation-delay: 0.3s; }
+
+    .panel-header {
+      padding: 16px 22px;
+      border-bottom: 2px solid var(--warna-garis);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-header h2 {
+      font-family: var(--font-judul);
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body { padding: 22px; }
+
+    /* ── TABEL DETAIL PESANAN ── */
+    .detail-tabel {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .detail-tabel thead th {
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #aaa;
+      border-bottom: 2px solid var(--warna-garis);
+    }
+
+    /* Kolom terakhir (harga) rata kanan */
+    .detail-tabel thead th:last-child,
+    .detail-tabel tbody td:last-child { text-align: right; }
+
+    .detail-tabel tbody td {
+      padding: 14px;
+      border-bottom: 1px solid var(--warna-garis);
+      vertical-align: middle;
+    }
+
+    .detail-tabel tbody tr:last-child td { border-bottom: none; }
+
+    /* Gambar kecil produk dalam tabel */
+    .tabel-gambar {
+      width: 48px; height: 48px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: var(--warna-latar-2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      overflow: hidden;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .tabel-gambar img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+
+    .tabel-nama-wrap {
+      display: flex;
+      align-items: center;
+    }
+
+    .tabel-nama { font-weight: 700; }
+    .tabel-qty  { color: #aaa; font-size: 0.82rem; }
+
+    /* Baris total di bawah tabel */
+    .tabel-footer {
+      padding: 16px 14px;
+      border-top: 2px solid var(--warna-garis);
+    }
+
+    .tabel-baris-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0;
+      font-size: 0.88rem;
+    }
+
+    .tabel-baris-total .label { color: #888; }
+    .tabel-baris-total .nilai { font-weight: 700; }
+
+    /* Baris TOTAL AKHIR — lebih besar */
+    .tabel-baris-total.grand {
+      border-top: 2px solid var(--warna-garis);
+      margin-top: 8px;
+      padding-top: 12px;
+      font-size: 1rem;
+    }
+    .tabel-baris-total.grand .nilai {
+      font-family: var(--font-judul);
+      font-size: 1.3rem;
+      color: var(--warna-utama);
+    }
+
+    /* ── INFO DAFTAR (nama, alamat, dll) ── */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;   /* 2 kolom info */
+      gap: 16px;
+    }
+
+    .info-item { padding: 2px 0; }
+
+    .info-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .info-nilai {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--warna-teks);
+      line-height: 1.5;
+    }
+
+    /* ── BADGE METODE PEMBAYARAN ── */
+    .metode-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 50px;
+      background: var(--warna-latar-2);
+      border: 1px solid var(--warna-garis);
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: var(--warna-teks);
+    }
+
+    /* ════════════════════════════════════
+       KOLOM KANAN — STATUS & AKSI
+       ════════════════════════════════════ */
+
+    /* ── KARTU STATUS PESANAN ── */
+    .kartu-status {
+      background: white;
+      border-radius: var(--radius-bulat);
+      box-shadow: var(--bayangan);
+      padding: 24px;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.5s 0.15s ease both;
+    }
+
+    .kartu-status h2 {
+      font-family: var(--font-judul);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--warna-garis);
+    }
+
+    /* ── TIMELINE STATUS PESANAN ──
+       Tambah langkah baru dengan menyalin .timeline-item
+    */
+    .timeline { position: relative; }
+
+    /* Garis vertikal penghubung semua langkah */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: var(--warna-garis);
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding-bottom: 20px;
+      position: relative;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+
+    /* Ikon lingkaran di timeline */
+    .timeline-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--warna-garis);
+      background: white;
+    }
+
+    /* Status aktif = warna utama */
+    .timeline-item.aktif .timeline-dot {
+      background: var(--warna-utama);
+      border-color: var(--warna-utama);
+      color: white;
+    }
+
+    /* Status selesai = hijau */
+    .timeline-item.selesai .timeline-dot {
+      background: #27AE60;
+      border-color: #27AE60;
+      color: white;
+    }
+
+    /* Status menunggu = abu-abu */
+    .timeline-item.menunggu .timeline-dot {
+      background: #f5f5f5;
+      color: #ccc;
+    }
+
+    .timeline-konten { flex: 1; padding-top: 4px; }
+
+    .timeline-judul {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+
+    .timeline-item.menunggu .timeline-judul { color: #ccc; }
+
+    .timeline-waktu {
+      font-size: 0.78rem;
+      color: #aaa;
+    }
+
+    /* ── KARTU AKSI (tombol-tombol) ── */
+    .kartu-aksi {
+      background: white;
+      border-radius: var(--radius-bulat);
+      box-shadow: var(--bayangan);
+      padding: 24px;
+      animation: fadeInUp 0.5s 0.25s ease both;
+    }
+
+    .kartu-aksi h2 {
+      font-family: var(--font-judul);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    /* Tombol aksi full-width */
+    .btn-aksi {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 13px 20px;
+      border-radius: 10px;
+      font-family: var(--font-isi);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 10px;
+      transition: all 0.25s;
+      border: none;
+    }
+    .btn-aksi:last-child { margin-bottom: 0; }
+
+    /* Varian tombol aksi */
+    .btn-wa {
+      background: #25D366;
+      color: white;
+    }
+    .btn-wa:hover { background: #1da851; transform: translateY(-2px); }
+
+    .btn-primer {
+      background: var(--warna-utama);
+      color: white;
+    }
+    .btn-primer:hover { background: var(--warna-sekunder); transform: translateY(-2px); }
+
+    .btn-outline {
+      background: white;
+      color: var(--warna-teks);
+      border: 2px solid var(--warna-garis) !important;
+    }
+    .btn-outline:hover { border-color: var(--warna-utama) !important; color: var(--warna-utama); }
+
+    /* ── TOMBOL CETAK / PRINT INVOICE ── */
+    .btn-cetak {
+      background: #2c3e50;
+      color: white;
+    }
+    .btn-cetak:hover { background: #1a252f; transform: translateY(-2px); }
+
+    /* ── CATATAN PENTING / INFO BOX ── */
+    .info-box {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-left: 4px solid var(--warna-aksen);   /* Ubah warna garis kiri */
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: #5d4e00;
+      margin-top: 20px;
+    }
+
+    /* ── HALAMAN PRINT (CSS saat dicetak) ──
+       Ubah di sini untuk mengatur tampilan saat dicetak
+    */
+    @media print {
+      /* Sembunyikan elemen yang tidak perlu saat print */
+      nav, .kartu-aksi, .step-bar, .btn-aksi, .info-box { display: none !important; }
+      .halaman-konfirmasi { padding-top: 20px; }
+      .konfirmasi-layout  { grid-template-columns: 1fr; }
+      .kartu-status       { display: none; }
+      .banner-sukses      { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+    }
+
+    /* ── RESPONSIF MOBILE ── */
+    @media (max-width: 768px) {
+      .konfirmasi-layout { grid-template-columns: 1fr; }
+      .info-grid         { grid-template-columns: 1fr; }
+    }
+
+    /* ── ANIMASI ── */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes bounceIn {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes denyut {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.08); }
+    }
+  </style>
+  <!-- ============================================================
+       LIBRARY QRCode.js — untuk generate QR Code QRIS
+       Sumber: https://github.com/davidshimjs/qrcodejs
+       Butuh koneksi internet. Jika offline, QR tidak muncul.
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+       ============================================================ -->
+  <nav id="navbar" class="scrolled">
+    <div class="container nav-dalam">
+      <a href="index.html" class="nav-logo">Warung<span>Nusantara</span></a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html#tentang">Tentang</a></li>
+        <li><a href="index.html#produk">Produk</a></li>
+        <li><a href="index.html#fitur">Keistimewaan</a></li>
+        <li><a href="index.html#kontak">Kontak</a></li>
+      </ul>
+
+      <!-- Badge keranjang (kosong di halaman ini karena sudah dibayar) -->
+      <a href="keranjang.html" class="nav-keranjang" id="navKeranjang">
+        🛒
+        <span class="keranjang-badge" id="keranjangBadge" style="display:none;">0</span>
+      </a>
+
+      <button class="hamburger" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+
+  <!-- ============================================================
+       KONTEN UTAMA
+       ============================================================ -->
+  <main class="halaman-konfirmasi">
+    <div class="container">
+
+      <!-- ── BANNER SUKSES ── -->
+      <div class="banner-sukses">
+        <span class="banner-ikon">✅</span>
+        <h1>Pesanan Berhasil Dikonfirmasi!</h1>
+        <p>Terima kasih sudah memesan di Warung Nusantara 🙏</p>
+
+        <!-- Nomor pesanan — diisi JavaScript -->
+        <div class="no-pesanan-banner" id="noPesananBanner">WN-000000</div>
+
+        <!-- Tanggal & waktu pesan — diisi JavaScript -->
+        <p id="tanggalPesanan" style="font-size:0.85rem; opacity:0.7;"></p>
+      </div>
+
+      <!-- ── STEP INDICATOR (semua selesai) ── -->
+      <div class="step-bar">
+        <div class="step selesai">
+          <div class="step-num">✓</div>
+          <span class="step-label">Keranjang</span>
+        </div>
+        <div class="step-garis"></div>
+        <div class="step selesai">
+          <div class="step-num">✓</div>
+          <span class="step-label">Pembayaran</span>
+        </div>
+        <div class="step-garis"></div>
+        <div class="step selesai">
+          <div class="step-num">✓</div>
+          <span class="step-label">Konfirmasi</span>
+        </div>
+      </div>
+
+
+      <div class="konfirmasi-layout">
+
+        <!-- ══════════════════════════════════════════
+             KOLOM KIRI — INVOICE DIGITAL
+             ══════════════════════════════════════════ -->
+        <div>
+
+          <!-- ── PANEL 1: DETAIL ITEM PESANAN ── -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2>🍽️ Detail Pesanan</h2>
+              <!-- Badge status — warna dan teks diubah JavaScript -->
+              <span id="badgeStatus" style="
+                padding: 4px 14px;
+                border-radius: 50px;
+                font-size: 0.75rem;
+                font-weight: 700;
+                background: #fff3cd;
+                color: #856404;
+              ">Menunggu Pembayaran</span>
+            </div>
+
+            <!-- Tabel produk — diisi JavaScript -->
+            <table class="detail-tabel">
+              <thead>
+                <tr>
+                  <th>Produk</th>
+                  <th style="text-align:center;">Qty</th>
+                  <th style="text-align:right;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody id="tabelItem">
+                <!-- Baris produk dirender oleh JavaScript -->
+              </tbody>
+            </table>
+
+            <!-- Ringkasan harga di bawah tabel — diisi JavaScript -->
+            <div class="tabel-footer" id="tabelFooter"></div>
+
+          </div>
+
+
+          <!-- ── PANEL 2: INFO PENGIRIMAN & PENERIMA ── -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2>📦 Info Penerima & Pengiriman</h2>
+            </div>
+            <div class="panel-body">
+              <!-- Grid info — diisi JavaScript -->
+              <div class="info-grid" id="infoGrid"></div>
+            </div>
+          </div>
+
+
+          <!-- ── PANEL 3: METODE PEMBAYARAN ── -->
+          <div class="panel">
+            <div class="panel-header">
+              <h2>💳 Metode Pembayaran</h2>
+            </div>
+            <div class="panel-body">
+              <!-- Diisi JavaScript -->
+              <div id="infoPembayaran"></div>
+
+              <!-- ── INSTRUKSI BAYAR — ubah teks sesuai kebutuhan ──
+                   Bagian ini menjelaskan langkah pembayaran kepada pelanggan
+              -->
+              <div class="info-box" id="instruksiBayar" style="margin-top:16px;"></div>
+
+              <!-- ============================================================
+                   QRIS BARCODE — hanya tampil jika metode = qris
+                   Library QRCode.js di-load dari CDN (butuh internet)
+                   ============================================================ -->
+              <div id="kotakQRIS" style="display:none; margin-top:20px; text-align:center;">
+
+                <!-- Label di atas QR -->
+                <p style="font-weight:700; font-size:0.85rem; letter-spacing:1px;
+                           text-transform:uppercase; color:var(--warna-utama); margin-bottom:12px;">
+                  📱 Scan QR Code untuk Membayar
+                </p>
+
+                <!-- Frame QR Code — ukuran dan warna bisa diubah di sini -->
+                <div id="qrisCanvas" style="
+                  display: inline-block;
+                  padding: 16px;                /* Ubah: jarak dalam frame QR */
+                  background: white;
+                  border-radius: 16px;          /* Ubah: sudut frame */
+                  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+                  border: 3px solid var(--warna-utama);  /* Ubah: warna border frame */
+                "></div>
+
+                <!-- Nominal di bawah QR -->
+                <div style="margin-top:14px;">
+                  <div style="font-size:0.8rem; color:#aaa; margin-bottom:4px;">
+                    Nominal Pembayaran
+                  </div>
+                  <div id="qrisNominal" style="
+                    font-family: var(--font-judul);
+                    font-size: 1.5rem;
+                    font-weight: 900;
+                    color: var(--warna-utama);
+                  ">Rp 0</div>
+                </div>
+
+                <!-- Catatan bawah QR -->
+                <p style="font-size:0.78rem; color:#aaa; margin-top:10px; line-height:1.6;">
+                  Berlaku untuk GoPay, OVO, Dana, BCA Mobile,<br>
+                  Shopee Pay, dan semua e-wallet ber-QRIS 🇮🇩
+                </p>
+
+                <!-- Timer countdown — QR biasanya berlaku terbatas -->
+                <div id="qrisTimer" style="
+                  margin-top:12px;
+                  padding: 8px 18px;
+                  background: #fff3cd;
+                  border-radius: 50px;
+                  font-size:0.82rem;
+                  font-weight:700;
+                  color:#856404;
+                  display:inline-block;
+                ">⏱️ QR berlaku: <span id="sisaWaktu">05:00</span></div>
+
+              </div><!-- akhir kotakQRIS -->
+            </div>
+          </div>
+
+        </div><!-- akhir kolom kiri -->
+
+
+        <!-- ══════════════════════════════════════════
+             KOLOM KANAN — STATUS & AKSI
+             ══════════════════════════════════════════ -->
+        <div>
+
+          <!-- ── KARTU STATUS PESANAN (TIMELINE) ── -->
+          <div class="kartu-status">
+            <h2>📍 Status Pesanan</h2>
+
+            <!--
+              TIMELINE PERJALANAN PESANAN
+              ─────────────────────────────
+              class="selesai"  → sudah dilalui (hijau)
+              class="aktif"    → sedang berlangsung (merah)
+              class="menunggu" → belum (abu-abu)
+
+              Tambah langkah baru: salin satu .timeline-item
+            -->
+            <div class="timeline">
+
+              <!-- Langkah 1: Pesanan diterima (selalu selesai) -->
+              <div class="timeline-item selesai">
+                <div class="timeline-dot">✓</div>
+                <div class="timeline-konten">
+                  <div class="timeline-judul">Pesanan Diterima</div>
+                  <div class="timeline-waktu" id="waktuTerima">—</div>
+                </div>
+              </div>
+
+              <!-- Langkah 2: Menunggu pembayaran (aktif) -->
+              <div class="timeline-item aktif">
+                <div class="timeline-dot">💳</div>
+                <div class="timeline-konten">
+                  <div class="timeline-judul">Menunggu Konfirmasi Bayar</div>
+                  <div class="timeline-waktu">Silakan lakukan pembayaran sesuai metode dipilih</div>
+                </div>
+              </div>
+
+              <!-- Langkah 3: Diproses (menunggu) -->
+              <div class="timeline-item menunggu">
+                <div class="timeline-dot">👨‍🍳</div>
+                <div class="timeline-konten">
+                  <div class="timeline-judul">Pesanan Diproses</div>
+                  <div class="timeline-waktu">Estimasi: 10–20 menit setelah bayar</div>
+                </div>
+              </div>
+
+              <!-- Langkah 4: Dalam pengiriman (menunggu) -->
+              <div class="timeline-item menunggu" id="stepKirim">
+                <div class="timeline-dot">🚚</div>
+                <div class="timeline-konten">
+                  <div class="timeline-judul" id="judulKirim">Dalam Pengiriman</div>
+                  <div class="timeline-waktu">Estimasi: 30 menit</div>
+                </div>
+              </div>
+
+              <!-- Langkah 5: Selesai (menunggu) -->
+              <div class="timeline-item menunggu">
+                <div class="timeline-dot">🎉</div>
+                <div class="timeline-konten">
+                  <div class="timeline-judul">Pesanan Selesai</div>
+                  <div class="timeline-waktu">Selamat menikmati!</div>
+                </div>
+              </div>
+
+            </div><!-- akhir timeline -->
+          </div>
+
+
+          <!-- ── KARTU AKSI ── -->
+          <div class="kartu-aksi">
+            <h2>🔧 Aksi Cepat</h2>
+
+            <!-- Tombol chat WhatsApp — ubah nomor di href -->
+            <a href="#" id="btnWA" class="btn-aksi btn-wa" target="_blank">
+              💬 Konfirmasi via WhatsApp
+            </a>
+
+            <!-- Tombol cetak invoice -->
+            <button class="btn-aksi btn-cetak" onclick="cetakInvoice()">
+              🖨️ Cetak / Simpan Invoice
+            </button>
+
+            <!-- Tombol pesan lagi -->
+            <a href="index.html#produk" class="btn-aksi btn-primer">
+              🍽️ Pesan Menu Lagi
+            </a>
+
+            <!-- Tombol kembali ke beranda -->
+            <a href="index.html" class="btn-aksi btn-outline">
+              🏠 Kembali ke Beranda
+            </a>
+
+          </div>
+
+        </div><!-- akhir kolom kanan -->
+
+      </div><!-- akhir konfirmasi-layout -->
+
+    </div>
+  </main>
+
+
+  <!-- ============================================================
+       JAVASCRIPT HALAMAN KONFIRMASI
+       ============================================================ -->
+  <script>
+
+    // ============================================================
+    // FORMAT HELPER
+    // ============================================================
+
+    // Ubah angka ke format Rupiah
+    function formatRupiah(angka) {
+      return 'Rp ' + Number(angka).toLocaleString('id-ID');
+    }
+
+    // Format ISO date ke teks Indonesia
+    // Contoh: "2025-06-08T10:30:00.000Z" → "Minggu, 8 Juni 2025 — 17:30 WIB"
+    function formatTanggal(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      const opsiTanggal = {
+        weekday: 'long',
+        year:    'numeric',
+        month:   'long',
+        day:     'numeric',
+        hour:    '2-digit',
+        minute:  '2-digit',
+        timeZone: 'Asia/Jakarta'         // Ubah timezone jika perlu
+      };
+      return d.toLocaleDateString('id-ID', opsiTanggal) + ' WIB';
+    }
+
+    // Format tanggal singkat untuk timeline
+    function formatWaktuSingkat(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      return d.toLocaleDateString('id-ID', {
+        day: 'numeric', month: 'short', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+        timeZone: 'Asia/Jakarta'
+      }) + ' WIB';
+    }
+
+    // Nama metode bayar yang lebih manusiawi
+    // Tambah entri jika ada metode baru di pembayaran.html
+    const NAMA_METODE = {
+      'bca':   '🏦 Transfer Bank BCA',
+      'bri':   '🏧 Transfer Bank BRI',
+      'gopay': '💚 GoPay',
+      'qris':  '📱 QRIS (Semua E-Wallet)',
+      'cod':   '💵 Bayar di Tempat (COD)',
+      'ovo':   '💜 OVO',
+    };
+
+    // Instruksi lanjutan per metode bayar
+    // Ubah nomor rekening / nomor HP sesuai data UMKM aslimu
+    const INSTRUKSI_METODE = {
+      'bca':   'Transfer ke <b>BCA 1234 5678 90</b> a.n. Warung Nusantara.<br>Setelah transfer, kirim bukti via WhatsApp agar pesanan segera diproses.',
+      'bri':   'Transfer ke <b>BRI 0987 6543 21</b> a.n. Warung Nusantara.<br>Setelah transfer, kirim bukti via WhatsApp agar pesanan segera diproses.',
+      'gopay': 'Kirim ke GoPay <b>0812-3456-7890</b> a.n. Warung Nusantara.<br>Screenshot konfirmasi & kirim via WhatsApp.',
+      'qris':  'Scan QRIS menggunakan aplikasi apapun (GoPay, OVO, Dana, BCA Mobile, dll).<br>Tunjukkan bukti bayar kepada kurir / kasir.',
+      'cod':   'Siapkan uang pas sebesar <b>total pesanan</b>. Bayarkan langsung kepada kurir saat pesanan tiba.<br>Tidak perlu transfer sebelumnya! ✅',
+      'ovo':   'Kirim ke OVO <b>0812-3456-7890</b> a.n. Warung Nusantara.<br>Screenshot konfirmasi & kirim via WhatsApp.',
+    };
+
+    // Nama pengiriman yang lebih manusiawi
+    const NAMA_KIRIM = {
+      'ambil':   'Ambil Sendiri (Gratis)',
+      'reguler': 'Pengiriman Reguler',
+      'express': 'Pengiriman Express ⚡',
+    };
+
+    // ============================================================
+    // MUAT & TAMPILKAN DATA KONFIRMASI
+    // Data dibaca dari localStorage yang dikirim oleh pembayaran.html
+    // ============================================================
+    function muatKonfirmasi() {
+      const data = JSON.parse(localStorage.getItem('dataKonfirmasi') || 'null');
+
+      // Jika tidak ada data, kembalikan ke halaman utama
+      if (!data) {
+        document.querySelector('.banner-sukses').style.display = 'none';
+        document.querySelector('.konfirmasi-layout').innerHTML = `
+          <div style="text-align:center; padding:60px 20px; grid-column:1/-1;">
+            <div style="font-size:4rem; margin-bottom:16px;">😕</div>
+            <h2 style="font-family:var(--font-judul); margin-bottom:10px;">Data pesanan tidak ditemukan</h2>
+            <p style="color:#888; margin-bottom:24px;">Mungkin kamu belum menyelesaikan proses pemesanan.</p>
+            <a href="index.html#produk" class="btn-aksi btn-primer" style="display:inline-flex; width:auto;">
+              🍽️ Pesan Sekarang
+            </a>
+          </div>`;
+        return;
+      }
+
+      // ── ISI BANNER ──
+      document.getElementById('noPesananBanner').textContent = data.noPesanan;
+      document.getElementById('tanggalPesanan').textContent  = formatTanggal(data.tanggal);
+      document.getElementById('waktuTerima').textContent     = formatWaktuSingkat(data.tanggal);
+
+      // ── STEP 4: Jika ambil sendiri, ganti teks langkah pengiriman ──
+      if (data.namaKirim === 'ambil') {
+        document.getElementById('judulKirim').textContent = 'Siap Diambil di Tempat';
+      }
+
+      // ── TABEL ITEM ──
+      const tbody = document.getElementById('tabelItem');
+      let htmlItem = '';
+
+      data.keranjang.forEach(function(item) {
+        // Gambar: coba tampilkan img, fallback ke emoji
+        const gambarHtml = item.gambar
+          ? `<div class="tabel-gambar"><img src="${item.gambar}" alt="${item.nama}" onerror="this.parentElement.textContent='🍽️'"></div>`
+          : `<div class="tabel-gambar">🍽️</div>`;
+
+        htmlItem += `
+          <tr>
+            <td>
+              <div class="tabel-nama-wrap">
+                ${gambarHtml}
+                <div>
+                  <div class="tabel-nama">${item.nama}</div>
+                  <div class="tabel-qty">${formatRupiah(item.harga)} / porsi</div>
+                </div>
+              </div>
+            </td>
+            <td style="text-align:center; font-weight:700;">× ${item.qty}</td>
+            <td style="text-align:right; font-weight:700; color:var(--warna-utama);">
+              ${formatRupiah(item.harga * item.qty)}
+            </td>
+          </tr>`;
+      });
+
+      tbody.innerHTML = htmlItem;
+
+      // ── FOOTER TABEL (subtotal, ongkir, diskon, total) ──
+      let htmlFooter = `
+        <div class="tabel-baris-total">
+          <span class="label">Subtotal</span>
+          <span class="nilai">${formatRupiah(data.subtotal)}</span>
+        </div>
+        <div class="tabel-baris-total">
+          <span class="label">Ongkos Kirim (${NAMA_KIRIM[data.namaKirim] || data.namaKirim})</span>
+          <span class="nilai">${data.ongkir === 0 ? 'Gratis' : formatRupiah(data.ongkir)}</span>
+        </div>`;
+
+      // Tampilkan baris diskon hanya jika ada
+      if (data.diskonRupiah > 0) {
+        htmlFooter += `
+          <div class="tabel-baris-total" style="color:#27AE60;">
+            <span class="label">🎉 Diskon (${data.diskonPersen}%)</span>
+            <span class="nilai">- ${formatRupiah(data.diskonRupiah)}</span>
+          </div>`;
+      }
+
+      htmlFooter += `
+        <div class="tabel-baris-total grand">
+          <span class="label">Total Pembayaran</span>
+          <span class="nilai">${formatRupiah(data.total)}</span>
+        </div>`;
+
+      document.getElementById('tabelFooter').innerHTML = htmlFooter;
+
+      // ── INFO PENERIMA & PENGIRIMAN ──
+      document.getElementById('infoGrid').innerHTML = `
+        <div class="info-item">
+          <div class="info-label">Nama Penerima</div>
+          <div class="info-nilai">${data.namaPenerima || '-'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">No. HP / WhatsApp</div>
+          <div class="info-nilai">${data.noHP || '-'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Email</div>
+          <div class="info-nilai">${data.email || '-'}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Metode Pengiriman</div>
+          <div class="info-nilai">${NAMA_KIRIM[data.namaKirim] || data.namaKirim || '-'}</div>
+        </div>
+        <div class="info-item" style="grid-column: 1 / -1;">
+          <div class="info-label">Alamat Pengiriman</div>
+          <div class="info-nilai">${data.alamat || 'Ambil Sendiri'}</div>
+        </div>
+        ${data.catatan ? `
+        <div class="info-item" style="grid-column: 1 / -1;">
+          <div class="info-label">Catatan untuk Kurir</div>
+          <div class="info-nilai">${data.catatan}</div>
+        </div>` : ''}`;
+
+      // ── INFO PEMBAYARAN ──
+      const namaBayar = NAMA_METODE[data.metodeBayar] || data.metodeBayar || '-';
+      document.getElementById('infoPembayaran').innerHTML = `
+        <span class="metode-badge">${namaBayar}</span>
+        <p style="margin-top:10px; font-size:0.85rem; color:#888;">
+          Nominal yang harus dibayar:
+          <strong style="color:var(--warna-utama); font-size:1.1rem;">
+            ${formatRupiah(data.total)}
+          </strong>
+        </p>`;
+
+      // ── INSTRUKSI PEMBAYARAN ──
+      document.getElementById('instruksiBayar').innerHTML =
+        '⚠️ <b>Langkah Selanjutnya:</b><br>' +
+        (INSTRUKSI_METODE[data.metodeBayar] || 'Silakan hubungi kami untuk info pembayaran.');
+
+      // ============================================================
+      // GENERATE QRIS QR CODE
+      // Hanya dijalankan jika metode bayar = "qris"
+      // Isi teks QR bisa diubah — untuk UMKM nyata, isi dengan
+      // string QRIS resmi dari bank/penyedia pembayaran kamu
+      // ============================================================
+      if (data.metodeBayar === 'qris') {
+        // Tampilkan kotak QRIS
+        document.getElementById('kotakQRIS').style.display = 'block';
+
+        // Tampilkan nominal
+        document.getElementById('qrisNominal').textContent = formatRupiah(data.total);
+
+        // ── TEKS ISI QR CODE ──
+        // Untuk demo: isi dengan info pesanan
+        // Untuk UMKM nyata: ganti dengan string QRIS resmi dari bankmu
+        // Contoh string QRIS asli: "00020101021226..."
+        const isiQR =
+          'WARUNG NUSANTARA\n' +
+          'No: ' + data.noPesanan + '\n' +
+          'Total: Rp ' + data.total.toLocaleString('id-ID') + '\n' +
+          'Nama: ' + data.namaPenerima;
+
+        // Generate QR menggunakan library QRCode.js
+        // Ubah width/height untuk ukuran QR, colorDark untuk warna titik
+        new QRCode(document.getElementById('qrisCanvas'), {
+          text:         isiQR,
+          width:        200,          /* Ubah: lebar QR dalam pixel */
+          height:       200,          /* Ubah: tinggi QR dalam pixel */
+          colorDark:    '#C0392B',    /* Ubah: warna titik QR (merah bata = warna UMKM) */
+          colorLight:   '#ffffff',    /* Ubah: warna latar QR (putih) */
+          correctLevel: QRCode.CorrectLevel.H  /* Level koreksi error: L/M/Q/H */
+        });
+
+        // ── COUNTDOWN TIMER QRIS ──
+        // QR berlaku selama X menit — ubah nilai menitQR
+        const menitQR   = 5;          /* Ubah: berapa menit QR berlaku */
+        let sisaDetik   = menitQR * 60;
+        const elTimer   = document.getElementById('sisaWaktu');
+        const timerDiv  = document.getElementById('qrisTimer');
+
+        const intervalTimer = setInterval(function() {
+          sisaDetik--;
+
+          if (sisaDetik <= 0) {
+            clearInterval(intervalTimer);
+            elTimer.textContent = '00:00';
+            // Ubah tampilan timer jadi merah ketika habis
+            timerDiv.style.background = '#fde8e8';
+            timerDiv.style.color      = '#c0392b';
+            timerDiv.innerHTML        = '❌ QR Code kadaluarsa — <a href="" style="color:var(--warna-utama);">Muat ulang halaman</a>';
+            return;
+          }
+
+          // Format menit:detik (05:00, 04:59, ...)
+          const m = Math.floor(sisaDetik / 60).toString().padStart(2, '0');
+          const s = (sisaDetik % 60).toString().padStart(2, '0');
+          elTimer.textContent = m + ':' + s;
+
+          // Warna berubah jadi kuning-merah saat sisa < 60 detik
+          if (sisaDetik < 60) {
+            timerDiv.style.background = '#fde8e8';
+            timerDiv.style.color      = '#c0392b';
+          }
+        }, 1000);
+      }
+
+      // ── LINK WHATSAPP dengan pesan otomatis ──
+      // Ubah nomor WA (62xxx) dan teks pesan sesuai kebutuhanmu
+      const pesanWA = encodeURIComponent(
+        `Halo Warung Nusantara! 👋\n\n` +
+        `Saya ingin konfirmasi pesanan:\n` +
+        `📋 No. Pesanan: *${data.noPesanan}*\n` +
+        `👤 Nama: ${data.namaPenerima}\n` +
+        `💳 Metode: ${namaBayar}\n` +
+        `💰 Total: ${formatRupiah(data.total)}\n\n` +
+        `Terlampir bukti pembayaran. Mohon konfirmasinya, terima kasih! 🙏`
+      );
+      document.getElementById('btnWA').href =
+        `https://wa.me/6281234567890?text=${pesanWA}`;   // ← Ubah nomor WA di sini
+
+    }
+
+    // ============================================================
+    // CETAK / SIMPAN INVOICE
+    // Memanggil dialog print bawaan browser
+    // ============================================================
+    function cetakInvoice() {
+      window.print();
+    }
+
+    // ============================================================
+    // INISIALISASI
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
+      muatKonfirmasi();
+
+      // Hamburger mobile
+      document.getElementById('hamburger').addEventListener('click', function() {
+        document.getElementById('navMenu').classList.toggle('terbuka');
+      });
+    });
+
+  </script>
+
+</body>
+</html>

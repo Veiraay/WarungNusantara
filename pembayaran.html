@@ -456,6 +456,11 @@
       to   { opacity: 1; transform: translateY(0); }
     }
   </style>
+  <!-- ============================================================
+       LIBRARY QRCode.js — untuk generate QR QRIS preview
+       Butuh koneksi internet untuk memuat library ini
+       ============================================================ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -697,6 +702,32 @@
               <!-- Instruksi pembayaran yang muncul setelah pilih metode -->
               <div class="instruksi-bayar" id="instruksiBayar"></div>
 
+              <!-- ============================================================
+                   PRATINJAU QR QRIS — hanya muncul saat QRIS dipilih
+                   QR ini bersifat PREVIEW saja di halaman pembayaran.
+                   QR final (dengan nomor pesanan) ada di konfirmasi.html
+                   ============================================================ -->
+              <div id="pratinjauQRIS" style="display:none; text-align:center; margin-top:20px;">
+                <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px; font-weight:700;">
+                  📱 PRATINJAU QR CODE QRIS
+                </p>
+
+                <!-- Frame QR — ubah ukuran dan warna border di sini -->
+                <div id="qrPratinjau" style="
+                  display:inline-block;
+                  padding:14px;
+                  background:white;
+                  border-radius:14px;
+                  border: 3px solid var(--warna-utama);
+                  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                "></div>
+
+                <p style="font-size:0.75rem; color:#bbb; margin-top:10px; line-height:1.6;">
+                  ⚠️ QR final dengan nominal akan tersedia<br>
+                  setelah kamu klik <b>"Konfirmasi Pesanan"</b>
+                </p>
+              </div>
+
             </div>
           </div>
 
@@ -877,6 +908,31 @@
         const kotak     = document.getElementById('instruksiBayar');
         kotak.innerHTML = instruksi;
         kotak.classList.add('tampil');
+
+        // ── QRIS: tampilkan QR pratinjau, sembunyikan untuk metode lain ──
+        const metodeDipilih = label.getAttribute('data-metode');
+        const pratinjauBox  = document.getElementById('pratinjauQRIS');
+        const qrContainer   = document.getElementById('qrPratinjau');
+
+        if (metodeDipilih === 'qris') {
+          pratinjauBox.style.display = 'block';
+          qrContainer.innerHTML = '';   // Bersihkan QR lama jika ada
+
+          // Generate QR pratinjau dengan teks singkat nama warung
+          // Untuk QR asli, ganti teks di bawah dengan string QRIS resmi-mu
+          new QRCode(qrContainer, {
+            text:         'WARUNG NUSANTARA - QRIS PEMBAYARAN',
+            width:        180,          /* Ubah: lebar QR preview */
+            height:       180,          /* Ubah: tinggi QR preview */
+            colorDark:    '#C0392B',    /* Ubah: warna titik QR */
+            colorLight:   '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        } else {
+          // Sembunyikan pratinjau QRIS jika pilih metode lain
+          pratinjauBox.style.display = 'none';
+          qrContainer.innerHTML = '';
+        }
       });
     });
 
@@ -939,16 +995,44 @@
       // -- Buat nomor pesanan acak --
       // Format: WN-XXXXXX (6 digit angka acak)
       const noAcak = 'WN-' + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById('noPesanan').textContent = noAcak;
 
-      // Simpan nomor pesanan ke localStorage jika perlu
-      localStorage.setItem('noPesanan', noAcak);
+      // Ambil data pesanan dari localStorage
+      const dataPesanan = JSON.parse(localStorage.getItem('pesanan') || '{}');
+      const metodeBayar = metodeTerpilih ? metodeTerpilih.value : '-';
 
-      // Update step indicator
-      document.getElementById('stepKonfirmasi').classList.add('aktif');
+      // ============================================================
+      // Kumpulkan semua data lengkap untuk halaman konfirmasi
+      // Tambah/ubah field di sini sesuai kebutuhan bisnismu
+      // ============================================================
+      const dataKonfirmasi = {
+        noPesanan:    noAcak,
+        tanggal:      new Date().toISOString(),
+        namaPenerima: nama,
+        noHP:         hp,
+        email:        document.getElementById('email').value.trim(),
+        alamat:       kirim !== 'ambil' ? document.getElementById('alamat').value.trim() : 'Ambil Sendiri',
+        kota:         kirim !== 'ambil' ? document.getElementById('kota').value : '-',
+        catatan:      kirim !== 'ambil' ? document.getElementById('catatan').value.trim() : '',
+        metodeBayar:  metodeBayar,
+        namaKirim:    dataPesanan.namaKirim || 'ambil',
+        keranjang:    dataPesanan.keranjang || [],
+        subtotal:     dataPesanan.subtotal  || 0,
+        ongkir:       dataPesanan.ongkir    || 0,
+        diskonPersen: dataPesanan.diskonPersen || 0,
+        diskonRupiah: dataPesanan.diskonRupiah || 0,
+        total:        dataPesanan.total     || 0,
+        status:       'Menunggu Pembayaran'
+      };
 
-      // Tampilkan modal sukses
-      document.getElementById('overlaySukses').classList.add('tampil');
+      // Simpan data konfirmasi — dibaca oleh konfirmasi.html
+      localStorage.setItem('dataKonfirmasi', JSON.stringify(dataKonfirmasi));
+
+      // Bersihkan data sementara keranjang & pesanan
+      localStorage.removeItem('keranjang');
+      localStorage.removeItem('pesanan');
+
+      // Arahkan ke halaman konfirmasi
+      window.location.href = 'konfirmasi.html';
     }
 
     // ============================================================
